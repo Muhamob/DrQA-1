@@ -76,6 +76,8 @@ def main():
         for i, batch in enumerate(batches):
             predictions.extend(model.predict(batch))
             log.debug('> evaluating [{}/{}]'.format(i, len(batches)))
+        log.info(predictions)
+        log.info(dev_y)
         em, f1 = score(predictions, dev_y)
         log.warning("dev EM: {} F1: {}".format(em, f1))
         if args.save_dawn_logs:
