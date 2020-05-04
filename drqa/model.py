@@ -11,6 +11,8 @@ import numpy as np
 import logging
 
 from torch.autograd import Variable
+
+from train import get_logger
 from .utils import AverageMeter
 from .rnn_reader import RnnDocReader
 
@@ -22,7 +24,7 @@ from .rnn_reader import RnnDocReader
 #   - remove "reset parameters" and use a gradient hook for gradient masking
 # Origin: https://github.com/facebookresearch/ParlAI/tree/master/parlai/agents/drqa
 
-logger = logging.getLogger(__name__)
+logger = get_logger("models")
 
 
 class DocReaderModel(object):
@@ -130,7 +132,7 @@ class DocReaderModel(object):
             },
             'config': self.opt,
             'epoch': epoch,
-            'em': acc,
+            'acc': acc,
             'best_eval': best_eval,
             'random_state': random.getstate(),
             'torch_state': torch.random.get_rng_state(),

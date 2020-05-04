@@ -96,6 +96,32 @@ def main():
                 log.info('[new best model saved.]')
 
 
+def get_logger(model_dir):
+    class ProgressHandler(logging.Handler):
+        def __init__(self, level=logging.NOTSET):
+            super().__init__(level)
+
+        def emit(self, record):
+            log_entry = self.format(record)
+            if record.message.startswith('> '):
+                sys.stdout.write('{}\r'.format(log_entry.rstrip()))
+                sys.stdout.flush()
+            else:
+                sys.stdout.write('{}\n'.format(log_entry))
+
+    log = logging.getLogger(__name__)
+    log.setLevel(logging.DEBUG)
+    fh = logging.FileHandler(os.path.join(model_dir, 'log.txt'))
+    fh.setLevel(logging.INFO)
+    ch = ProgressHandler()
+    ch.setLevel(logging.DEBUG)
+    formatter = logging.Formatter(fmt='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S')
+    fh.setFormatter(formatter)
+    ch.setFormatter(formatter)
+    log.addHandler(fh)
+    log.addHandler(ch)
+
+
 def setup():
     parser = argparse.ArgumentParser(
         description='Train a Document Reader model.'
@@ -179,29 +205,8 @@ def setup():
         torch.cuda.manual_seed(args.seed)
 
     # setup logger
-    class ProgressHandler(logging.Handler):
-        def __init__(self, level=logging.NOTSET):
-            super().__init__(level)
 
-        def emit(self, record):
-            log_entry = self.format(record)
-            if record.message.startswith('> '):
-                sys.stdout.write('{}\r'.format(log_entry.rstrip()))
-                sys.stdout.flush()
-            else:
-                sys.stdout.write('{}\n'.format(log_entry))
-
-    log = logging.getLogger(__name__)
-    log.setLevel(logging.DEBUG)
-    fh = logging.FileHandler(os.path.join(args.model_dir, 'log.txt'))
-    fh.setLevel(logging.INFO)
-    ch = ProgressHandler()
-    ch.setLevel(logging.DEBUG)
-    formatter = logging.Formatter(fmt='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S')
-    fh.setFormatter(formatter)
-    ch.setFormatter(formatter)
-    log.addHandler(fh)
-    log.addHandler(ch)
+    log = get_logger(args.model_dir)
 
     return args, log
 
