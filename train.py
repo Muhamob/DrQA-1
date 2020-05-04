@@ -261,10 +261,10 @@ class BatchGen:
         for batch in self.data:
             batch_size = len(batch)
             batch = list(zip(*batch))
-            if self.eval:
-                assert len(batch) == 8, f"{len(batch)}"
-            else:
-                assert len(batch) == 10, f"{len(batch)}"
+            # if self.eval:
+            #     assert len(batch) == 8, f"{len(batch)}"
+            # else:
+            #     assert len(batch) == 10, f"{len(batch)}"
 
             context_len = max(len(x) for x in batch[1])
             context_id = torch.LongTensor(batch_size, context_len).fill_(0)
