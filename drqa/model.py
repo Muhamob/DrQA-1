@@ -117,7 +117,6 @@ class DocReaderModel(object):
         # log.info(target.data.cpu().numpy())
         # log.info(logits.data.cpu().numpy())
         loss = self.criterion(logits, target.view(-1, 1))
-        log.info(f"loss: {loss}")
         self.train_loss.update(loss.item())
 
         # Clear gradients and run backward
