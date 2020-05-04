@@ -301,7 +301,7 @@ class BatchGen:
             text = list(batch[6])
             span = list(batch[7])
             if not self.eval:
-                assert isinstance(batch[8], str)
+                assert isinstance(batch[8], str), f"{batch[8]}, {type(batch[8])}"
                 answer = 1 if batch[8]=='True' else 0
                 answer = torch.LongTensor(answer)
                 # y_s = torch.LongTensor(batch[8])
