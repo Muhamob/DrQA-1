@@ -149,7 +149,8 @@ class DocReaderModel(object):
         probs = torch.sigmoid(logits).data.cpu().numpy()
 
         # predictions = np.argmax(logits, 1)
-        predictions = np.floor(np.asarray(probs))
+        # predictions = np.floor(np.asarray(probs))
+        predictions = np.where(probs >= 0.5, 1, 0)
 
         return predictions
 
