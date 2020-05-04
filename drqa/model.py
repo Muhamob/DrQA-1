@@ -119,7 +119,7 @@ class DocReaderModel(object):
         return predictions
 
     def save(self, filename, epoch, scores):
-        em, f1, best_eval = scores
+        acc, best_eval = scores
         params = {
             'state_dict': {
                 'network': self.network.state_dict(),
@@ -129,8 +129,7 @@ class DocReaderModel(object):
             },
             'config': self.opt,
             'epoch': epoch,
-            'em': em,
-            'f1': f1,
+            'em': acc,
             'best_eval': best_eval,
             'random_state': random.getstate(),
             'torch_state': torch.random.get_rng_state(),
