@@ -82,6 +82,7 @@ class DocReaderModel(object):
 
         # Compute loss and accuracies
         # loss = F.nll_loss(score_s, target_s) + F.nll_loss(score_e, target_e)
+        logger.info(target.data.cpu().numpy())
         loss = F.nll_loss(logits, target)
         self.train_loss.update(loss.item())
 
