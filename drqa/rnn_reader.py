@@ -105,7 +105,8 @@ class RnnDocReader(nn.Module):
         self.projection = nn.Linear(doc_hidden_size + question_hidden_size, 2)
 
     def forward(self, x1, x1_f, x1_pos, x1_ner, x1_mask, x2, x2_mask):
-        """Inputs:
+        """
+        Inputs:
         x1 = document word indices             [batch * len_d]
         x1_f = document word features indices  [batch * len_d * nfeat]
         x1_pos = document POS tags             [batch * len_d]

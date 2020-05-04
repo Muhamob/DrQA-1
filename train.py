@@ -78,11 +78,12 @@ def main():
             log.debug('> evaluating [{}/{}]'.format(i, len(batches)))
         log.info(predictions)
         log.info(dev_y)
-        em, f1 = score(predictions, dev_y)
-        log.warning("dev EM: {} F1: {}".format(em, f1))
+        # em, f1 = score(predictions, dev_y)
+        acc = score(predictions, dev_y)
+        log.warning("dev accuracy: {}".format(acc))
         if args.save_dawn_logs:
             time_diff = datetime.now() - dawn_start
-            log.warning("dawn_entry: {}\t{}\t{}".format(epoch, f1/100.0, float(time_diff.total_seconds() / 3600.0)))
+            log.warning("dawn_entry: {}\t{}\t{}".format(epoch, acc, float(time_diff.total_seconds() / 3600.0)))
         # save
         if not args.save_last_only or epoch == epoch_0 + args.epochs - 1:
             model_file = os.path.join(args.model_dir, 'checkpoint_epoch_{}.pt'.format(epoch))
@@ -300,7 +301,9 @@ class BatchGen:
             text = list(batch[6])
             span = list(batch[7])
             if not self.eval:
-                answer = torch.LongTensor(batch[8])
+                assert isinstance(batch[8], bool)
+                answer = 1 if batch[8] else 0
+                answer = torch.LongTensor(answer)
                 # y_s = torch.LongTensor(batch[8])
                 # y_e = torch.LongTensor(batch[9])
             if self.gpu:
@@ -366,14 +369,16 @@ def _f1_score(pred, answers):
 
 def score(pred, truth):
     assert len(pred) == len(truth)
-    f1 = em = total = 0
-    for p, t in zip(pred, truth):
-        total += 1
-        em += _exact_match(p, t)
-        f1 += _f1_score(p, t)
-    em = 100. * em / total
-    f1 = 100. * f1 / total
-    return em, f1
+    # f1 = em = total = 0
+    # for p, t in zip(pred, truth):
+    #     total += 1
+    #     em += _exact_match(p, t)
+    #     f1 += _f1_score(p, t)
+    # em = 100. * em / total
+    # f1 = 100. * f1 / total
+    from sklearn.metrics import accuracy_score
+    return accuracy_score(pred, truth)
+    # return em, f1
 
 
 if __name__ == '__main__':
