@@ -146,10 +146,11 @@ class DocReaderModel(object):
             logits = self.network(*inputs)
 
         # Transfer to CPU/normal tensors for numpy ops
-        probs = torch.sigmoid(logits)
+        probs = torch.sigmoid(logits).data.cpu().numpy()
+        log.info(probs)
 
         # predictions = np.argmax(logits, 1)
-        predictions = np.floor(probs.data.cpu().numpy())
+        predictions = np.floor(np.asarray(probs))
 
         return predictions
 
