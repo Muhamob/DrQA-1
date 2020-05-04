@@ -148,6 +148,7 @@ class RnnDocReader(nn.Module):
 
         # here comes the difference with DrQA - adaptation to BoolQ format
         # aggregate passage vectors
+        print(doc_hiddens.size(), x1_mask.size())
         d_merge_weights = layers.uniform_weights(doc_hiddens, x1_mask)
         document_hidden = layers.weighted_avg(doc_hiddens, d_merge_weights)
 
