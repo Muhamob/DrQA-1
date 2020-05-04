@@ -260,7 +260,7 @@ def uniform_weights(x, x_mask):
     logger.info(alpha.size())
     alpha = alpha * x_mask.eq(0).float()
     logger.info(alpha.size())
-    alpha = alpha / alpha.sum(1).expand(-1, 1)
+    alpha = alpha / alpha.sum(1, keepdim=True)# .expand(alpha.size())
     return alpha
 
 
