@@ -65,10 +65,12 @@ def main():
         start = datetime.now()
         for i, batch in enumerate(batches):
             model.update(batch)
-            if i % args.log_per_updates == 0:
-                log.info('> epoch [{0:2}] updates[{1:6}] train loss[{2:.5f}] remaining[{3}]'.format(
-                    epoch, model.updates, model.train_loss.value,
-                    str((datetime.now() - start) / (i + 1) * (len(batches) - i - 1)).split('.')[0]))
+
+            # if i % args.log_per_updates == 0:
+            log.info(i)
+            log.info('> epoch [{0:2}] updates[{1:6}] train loss[{2:.5f}] remaining[{3}]'.format(
+                epoch, model.updates, model.train_loss.value,
+                str((datetime.now() - start) / (i + 1) * (len(batches) - i - 1)).split('.')[0]))
         log.debug('\n')
         # eval
         batches = BatchGen(dev, batch_size=args.batch_size, evaluation=True, gpu=args.cuda)
