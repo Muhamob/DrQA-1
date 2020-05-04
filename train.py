@@ -120,6 +120,7 @@ def get_logger(model_dir):
     ch.setFormatter(formatter)
     log.addHandler(fh)
     log.addHandler(ch)
+    return log
 
 
 def setup():
