@@ -26,7 +26,7 @@ def main():
         annotate_ = partial(annotate, wv_cased=args.wv_cased)
         train = list(tqdm(p.imap(annotate_, train, chunksize=args.batch_size), total=len(train), desc='train'))
         dev = list(tqdm(p.imap(annotate_, dev, chunksize=args.batch_size), total=len(dev), desc='dev  '))
-    train = list(map(index_answer, train))
+    # train = list(map(index_answer, train))
     initial_len = len(train)
     train = list(filter(lambda x: x[-1] is not None, train))
     log.info('drop {} inconsistent samples.'.format(initial_len - len(train)))
