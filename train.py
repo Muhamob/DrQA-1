@@ -46,10 +46,10 @@ def main():
         for i, batch in enumerate(batches):
             predictions.extend(model.predict(batch))
             log.debug('> evaluating [{}/{}]'.format(i, len(batches)))
-        em, f1 = score(predictions, dev_y)
-        log.info("[dev EM: {} F1: {}]".format(em, f1))
-        if math.fabs(em - checkpoint['em']) > 1e-3 or math.fabs(f1 - checkpoint['f1']) > 1e-3:
-            log.info('Inconsistent: recorded EM: {} F1: {}'.format(checkpoint['em'], checkpoint['f1']))
+        acc = score(predictions, dev_y)
+        log.info("[dev accuracy: {}]".format(acc))
+        if math.fabs(acc - checkpoint['acc']) > 1e-3:
+            log.info('Inconsistent: recorded acc: {}'.format(checkpoint['acc']))
             log.error('Error loading model: current code is inconsistent with code used to train the previous model.')
             exit(1)
         best_val_score = checkpoint['best_eval']
