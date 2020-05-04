@@ -102,7 +102,7 @@ class RnnDocReader(nn.Module):
             doc_hidden_size,
             question_hidden_size,
         )
-        self.projection = nn.Linear(doc_hidden_size + question_hidden_size, 2)
+        self.projection = nn.Linear(doc_hidden_size + question_hidden_size, 1)
 
     def forward(self, x1, x1_f, x1_pos, x1_ner, x1_mask, x2, x2_mask):
         """

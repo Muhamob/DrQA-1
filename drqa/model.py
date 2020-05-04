@@ -10,6 +10,7 @@ import sys
 import torch
 import torch.optim as optim
 import torch.nn.functional as F
+from torch import nn
 import numpy as np
 import logging
 
@@ -81,6 +82,9 @@ class DocReaderModel(object):
         self.opt_state_dict = state_dict['optimizer'] if state_dict else None
         self.build_optimizer()
 
+        # criterion
+        self.criterion = nn.BCEWithLogitsLoss()
+
     def build_optimizer(self):
         parameters = [p for p in self.network.parameters() if p.requires_grad]
         if self.opt['optimizer'] == 'sgd':
@@ -112,7 +116,7 @@ class DocReaderModel(object):
         # loss = F.nll_loss(score_s, target_s) + F.nll_loss(score_e, target_e)
         log.info(target.data.cpu().numpy())
         log.info(logits.data.cpu().numpy())
-        loss = F.nll_loss(logits, target)
+        loss = self.criterion(logits, target)
         self.train_loss.update(loss.item())
 
         # Clear gradients and run backward
