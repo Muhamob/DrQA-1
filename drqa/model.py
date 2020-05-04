@@ -117,6 +117,7 @@ class DocReaderModel(object):
         # log.info(target.data.cpu().numpy())
         # log.info(logits.data.cpu().numpy())
         loss = self.criterion(logits, target.view(-1, 1))
+        log.info(f"loss: {loss}")
         self.train_loss.update(loss.item())
 
         # Clear gradients and run backward
@@ -125,7 +126,7 @@ class DocReaderModel(object):
 
         # Clip gradients
         torch.nn.utils.clip_grad_norm_(self.network.parameters(),
-                                      self.opt['grad_clipping'])
+                                       self.opt['grad_clipping'])
 
         # Update parameters
         self.optimizer.step()
