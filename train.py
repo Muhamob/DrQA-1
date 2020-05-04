@@ -66,7 +66,7 @@ def main():
         for i, batch in enumerate(batches):
             model.update(batch)
 
-            if i % 10 == 9:
+            if i % 100 == 99:
                 log.info('> epoch [{0:2}] updates[{1:6}] train loss[{2:.5f}] remaining[{3}]'.format(
                     epoch, model.updates, model.train_loss.value,
                     str((datetime.now() - start) / (i + 1) * (len(batches) - i - 1)).split('.')[0]))
