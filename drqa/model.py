@@ -3,6 +3,7 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
+import os
 import random
 import torch
 import torch.optim as optim
@@ -12,7 +13,7 @@ import logging
 
 from torch.autograd import Variable
 
-from train import get_logger
+
 from .utils import AverageMeter
 from .rnn_reader import RnnDocReader
 
@@ -24,7 +25,30 @@ from .rnn_reader import RnnDocReader
 #   - remove "reset parameters" and use a gradient hook for gradient masking
 # Origin: https://github.com/facebookresearch/ParlAI/tree/master/parlai/agents/drqa
 
-logger = get_logger("models")
+class ProgressHandler(logging.Handler):
+    def __init__(self, level=logging.NOTSET):
+        super().__init__(level)
+
+    def emit(self, record):
+        log_entry = self.format(record)
+        if record.message.startswith('> '):
+            sys.stdout.write('{}\r'.format(log_entry.rstrip()))
+            sys.stdout.flush()
+        else:
+            sys.stdout.write('{}\n'.format(log_entry))
+
+
+log = logging.getLogger(__name__)
+log.setLevel(logging.DEBUG)
+fh = logging.FileHandler(os.path.join("models", 'log.txt'))
+fh.setLevel(logging.INFO)
+ch = ProgressHandler()
+ch.setLevel(logging.DEBUG)
+formatter = logging.Formatter(fmt='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S')
+fh.setFormatter(formatter)
+ch.setFormatter(formatter)
+log.addHandler(fh)
+log.addHandler(ch)
 
 
 class DocReaderModel(object):
@@ -84,7 +108,7 @@ class DocReaderModel(object):
 
         # Compute loss and accuracies
         # loss = F.nll_loss(score_s, target_s) + F.nll_loss(score_e, target_e)
-        logger.info(target.data.cpu().numpy())
+        log.info(target.data.cpu().numpy())
         loss = F.nll_loss(logits, target)
         self.train_loss.update(loss.item())
 
