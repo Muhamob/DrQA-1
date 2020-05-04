@@ -298,8 +298,9 @@ class BatchGen:
             text = list(batch[6])
             span = list(batch[7])
             if not self.eval:
-                y_s = torch.LongTensor(batch[8])
-                y_e = torch.LongTensor(batch[9])
+                answer = torch.LongTensor(batch[8])
+                # y_s = torch.LongTensor(batch[8])
+                # y_e = torch.LongTensor(batch[9])
             if self.gpu:
                 context_id = context_id.pin_memory()
                 context_feature = context_feature.pin_memory()
@@ -313,7 +314,7 @@ class BatchGen:
                        question_id, question_mask, text, span)
             else:
                 yield (context_id, context_feature, context_tag, context_ent, context_mask,
-                       question_id, question_mask, y_s, y_e, text, span)
+                       question_id, question_mask, answer, answer, text, span)
 
 
 def _normalize_answer(s):
