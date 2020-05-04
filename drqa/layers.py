@@ -3,6 +3,8 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
+import logging
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -14,6 +16,7 @@ from torch.autograd import Variable
 # ------------------------------------------------------------------------------
 # Modules
 # ------------------------------------------------------------------------------
+logger = logging.getLogger(__name__)
 
 
 class StackedBRNN(nn.Module):
@@ -249,11 +252,15 @@ class LinearSeqAttn(nn.Module):
 
 def uniform_weights(x, x_mask):
     """Return uniform weights over non-masked input."""
+    logger.info(x.size())
+    logger.info(x_mask.size())
     alpha = Variable(torch.ones(x.size(0), x.size(1)))
     if x.data.is_cuda:
         alpha = alpha.cuda()
+    logger.info(alpha.size())
     alpha = alpha * x_mask.eq(0).float()
-    alpha = alpha / alpha.sum(1).expand(alpha.size())
+    logger.info(alpha.size())
+    alpha = alpha / alpha.sum(1, keepdim=True)# .expand(alpha.size())
     return alpha
 
 

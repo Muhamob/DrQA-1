@@ -26,7 +26,7 @@ def main():
         annotate_ = partial(annotate, wv_cased=args.wv_cased)
         train = list(tqdm(p.imap(annotate_, train, chunksize=args.batch_size), total=len(train), desc='train'))
         dev = list(tqdm(p.imap(annotate_, dev, chunksize=args.batch_size), total=len(dev), desc='dev  '))
-    train = list(map(index_answer, train))
+    # train = list(map(index_answer, train))
     initial_len = len(train)
     train = list(filter(lambda x: x[-1] is not None, train))
     log.info('drop {} inconsistent samples.'.format(initial_len - len(train)))
@@ -140,24 +140,20 @@ def setup():
 
     return args, log
 
+
 def flatten_json(data_file, mode):
     """Flatten each article in training data."""
-    with open(data_file) as f:
-        data = json.load(f)['data']
+    # with open(data_file) as f:
+    #     data = json.load(f)['data']
+    with open(data_file) as reader:
+        data = list(map(json.loads, reader))
     rows = []
-    for article in data:
-        for paragraph in article['paragraphs']:
-            context = paragraph['context']
-            for qa in paragraph['qas']:
-                id_, question, answers = qa['id'], qa['question'], qa['answers']
-                if mode == 'train':
-                    answer = answers[0]['text']  # in training data there's only one answer
-                    answer_start = answers[0]['answer_start']
-                    answer_end = answer_start + len(answer)
-                    rows.append((id_, context, question, answer, answer_start, answer_end))
-                else:  # mode == 'dev'
-                    answers = [a['text'] for a in answers]
-                    rows.append((id_, context, question, answers))
+    for i, doc in enumerate(data):
+        if mode == "train":
+            rows.append((i, doc['passage'], doc['question'], doc['answer']))
+        elif mode == "dev":
+            rows.append((i, doc['passage'], doc['question'], doc['answer']))
+
     return rows
 
 

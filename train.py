@@ -46,10 +46,10 @@ def main():
         for i, batch in enumerate(batches):
             predictions.extend(model.predict(batch))
             log.debug('> evaluating [{}/{}]'.format(i, len(batches)))
-        em, f1 = score(predictions, dev_y)
-        log.info("[dev EM: {} F1: {}]".format(em, f1))
-        if math.fabs(em - checkpoint['em']) > 1e-3 or math.fabs(f1 - checkpoint['f1']) > 1e-3:
-            log.info('Inconsistent: recorded EM: {} F1: {}'.format(checkpoint['em'], checkpoint['f1']))
+        acc = score(predictions, dev_y)
+        log.info("[dev accuracy: {}]".format(acc))
+        if math.fabs(acc - checkpoint['acc']) > 1e-3:
+            log.info('Inconsistent: recorded acc: {}'.format(checkpoint['acc']))
             log.error('Error loading model: current code is inconsistent with code used to train the previous model.')
             exit(1)
         best_val_score = checkpoint['best_eval']
@@ -65,10 +65,8 @@ def main():
         start = datetime.now()
         for i, batch in enumerate(batches):
             model.update(batch)
-            if i % args.log_per_updates == 0:
-                log.info('> epoch [{0:2}] updates[{1:6}] train loss[{2:.5f}] remaining[{3}]'.format(
-                    epoch, model.updates, model.train_loss.value,
-                    str((datetime.now() - start) / (i + 1) * (len(batches) - i - 1)).split('.')[0]))
+            if model.updates % 100 == 99:
+                log.info('> epoch [{0:2}] updates[{1:6}] train loss[{2:.5f}]'.format(epoch, model.updates, model.train_loss.value))
         log.debug('\n')
         # eval
         batches = BatchGen(dev, batch_size=args.batch_size, evaluation=True, gpu=args.cuda)
@@ -76,21 +74,51 @@ def main():
         for i, batch in enumerate(batches):
             predictions.extend(model.predict(batch))
             log.debug('> evaluating [{}/{}]'.format(i, len(batches)))
-        em, f1 = score(predictions, dev_y)
-        log.warning("dev EM: {} F1: {}".format(em, f1))
+        log.info(predictions)
+        log.info(dev_y)
+        # em, f1 = score(predictions, dev_y)
+        acc = score(predictions, dev_y)
+        log.warning("dev accuracy: {}".format(acc))
         if args.save_dawn_logs:
             time_diff = datetime.now() - dawn_start
-            log.warning("dawn_entry: {}\t{}\t{}".format(epoch, f1/100.0, float(time_diff.total_seconds() / 3600.0)))
+            log.warning("dawn_entry: {}\t{}\t{}".format(epoch, acc, float(time_diff.total_seconds() / 3600.0)))
         # save
         if not args.save_last_only or epoch == epoch_0 + args.epochs - 1:
             model_file = os.path.join(args.model_dir, 'checkpoint_epoch_{}.pt'.format(epoch))
-            model.save(model_file, epoch, [em, f1, best_val_score])
-            if f1 > best_val_score:
-                best_val_score = f1
+            model.save(model_file, epoch, [acc, best_val_score])
+            if acc > best_val_score:
+                best_val_score = acc
                 copyfile(
                     model_file,
                     os.path.join(args.model_dir, 'best_model.pt'))
                 log.info('[new best model saved.]')
+
+
+def get_logger(model_dir):
+    class ProgressHandler(logging.Handler):
+        def __init__(self, level=logging.NOTSET):
+            super().__init__(level)
+
+        def emit(self, record):
+            log_entry = self.format(record)
+            if record.message.startswith('> '):
+                sys.stdout.write('{}\r'.format(log_entry.rstrip()))
+                sys.stdout.flush()
+            else:
+                sys.stdout.write('{}\n'.format(log_entry))
+
+    log = logging.getLogger(__name__)
+    log.setLevel(logging.DEBUG)
+    fh = logging.FileHandler(os.path.join(model_dir, 'log.txt'))
+    fh.setLevel(logging.INFO)
+    ch = ProgressHandler()
+    ch.setLevel(logging.DEBUG)
+    formatter = logging.Formatter(fmt='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S')
+    fh.setFormatter(formatter)
+    ch.setFormatter(formatter)
+    log.addHandler(fh)
+    log.addHandler(ch)
+    return log
 
 
 def setup():
@@ -176,29 +204,8 @@ def setup():
         torch.cuda.manual_seed(args.seed)
 
     # setup logger
-    class ProgressHandler(logging.Handler):
-        def __init__(self, level=logging.NOTSET):
-            super().__init__(level)
 
-        def emit(self, record):
-            log_entry = self.format(record)
-            if record.message.startswith('> '):
-                sys.stdout.write('{}\r'.format(log_entry.rstrip()))
-                sys.stdout.flush()
-            else:
-                sys.stdout.write('{}\n'.format(log_entry))
-
-    log = logging.getLogger(__name__)
-    log.setLevel(logging.DEBUG)
-    fh = logging.FileHandler(os.path.join(args.model_dir, 'log.txt'))
-    fh.setLevel(logging.INFO)
-    ch = ProgressHandler()
-    ch.setLevel(logging.DEBUG)
-    formatter = logging.Formatter(fmt='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S')
-    fh.setFormatter(formatter)
-    ch.setFormatter(formatter)
-    log.addHandler(fh)
-    log.addHandler(ch)
+    log = get_logger(args.model_dir)
 
     return args, log
 
@@ -261,10 +268,10 @@ class BatchGen:
         for batch in self.data:
             batch_size = len(batch)
             batch = list(zip(*batch))
-            if self.eval:
-                assert len(batch) == 8
-            else:
-                assert len(batch) == 10
+            # if self.eval:
+            #     assert len(batch) == 8, f"{len(batch)}"
+            # else:
+            #     assert len(batch) == 10, f"{len(batch)}"
 
             context_len = max(len(x) for x in batch[1])
             context_id = torch.LongTensor(batch_size, context_len).fill_(0)
@@ -298,8 +305,7 @@ class BatchGen:
             text = list(batch[6])
             span = list(batch[7])
             if not self.eval:
-                y_s = torch.LongTensor(batch[8])
-                y_e = torch.LongTensor(batch[9])
+                answer = torch.FloatTensor(batch[8])
             if self.gpu:
                 context_id = context_id.pin_memory()
                 context_feature = context_feature.pin_memory()
@@ -313,7 +319,7 @@ class BatchGen:
                        question_id, question_mask, text, span)
             else:
                 yield (context_id, context_feature, context_tag, context_ent, context_mask,
-                       question_id, question_mask, y_s, y_e, text, span)
+                       question_id, question_mask, answer, answer, text, span)
 
 
 def _normalize_answer(s):
@@ -363,14 +369,16 @@ def _f1_score(pred, answers):
 
 def score(pred, truth):
     assert len(pred) == len(truth)
-    f1 = em = total = 0
-    for p, t in zip(pred, truth):
-        total += 1
-        em += _exact_match(p, t)
-        f1 += _f1_score(p, t)
-    em = 100. * em / total
-    f1 = 100. * f1 / total
-    return em, f1
+    # f1 = em = total = 0
+    # for p, t in zip(pred, truth):
+    #     total += 1
+    #     em += _exact_match(p, t)
+    #     f1 += _f1_score(p, t)
+    # em = 100. * em / total
+    # f1 = 100. * f1 / total
+    from sklearn.metrics import accuracy_score
+    return accuracy_score(pred, truth)
+    # return em, f1
 
 
 if __name__ == '__main__':
