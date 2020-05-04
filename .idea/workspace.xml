@@ -56,8 +56,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/drqa/model.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="390">
-              <caret line="152" column="47" selection-start-line="152" selection-start-column="47" selection-end-line="152" selection-end-column="47" />
+            <state relative-caret-position="330">
+              <caret line="148" column="56" selection-start-line="148" selection-start-column="56" selection-end-line="148" selection-end-column="56" />
               <folding>
                 <element signature="e#293#302#0" expanded="true" />
               </folding>
@@ -193,12 +193,12 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1588618818044</updated>
-      <workItem from="1588618824398" duration="12640000" />
+      <workItem from="1588618824398" duration="12760000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="12640000" />
+    <option name="totallyTimeSpent" value="12760000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1916" y="0" width="1928" height="1084" extended-state="6" />
@@ -286,8 +286,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/drqa/model.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="390">
-          <caret line="152" column="47" selection-start-line="152" selection-start-column="47" selection-end-line="152" selection-end-column="47" />
+        <state relative-caret-position="330">
+          <caret line="148" column="56" selection-start-line="148" selection-start-column="56" selection-end-line="148" selection-end-column="56" />
           <folding>
             <element signature="e#293#302#0" expanded="true" />
           </folding>
