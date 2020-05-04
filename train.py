@@ -307,7 +307,7 @@ class BatchGen:
             text = list(batch[6])
             span = list(batch[7])
             if not self.eval:
-                answer = torch.LongTensor(batch[8])
+                answer = torch.FloatTensor(batch[8])
             if self.gpu:
                 context_id = context_id.pin_memory()
                 context_feature = context_feature.pin_memory()
