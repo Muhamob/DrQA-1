@@ -116,7 +116,7 @@ class DocReaderModel(object):
         # loss = F.nll_loss(score_s, target_s) + F.nll_loss(score_e, target_e)
         log.info(target.data.cpu().numpy())
         log.info(logits.data.cpu().numpy())
-        loss = self.criterion(logits, target)
+        loss = self.criterion(logits, target.view(-1, 1))
         self.train_loss.update(loss.item())
 
         # Clear gradients and run backward
