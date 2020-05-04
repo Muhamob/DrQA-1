@@ -301,11 +301,7 @@ class BatchGen:
             text = list(batch[6])
             span = list(batch[7])
             if not self.eval:
-                assert isinstance(batch[8], str), f"{batch[8]}, {type(batch[8])}"
-                answer = 1 if batch[8]=='True' else 0
-                answer = torch.LongTensor(answer)
-                # y_s = torch.LongTensor(batch[8])
-                # y_e = torch.LongTensor(batch[9])
+                answer = torch.LongTensor(batch[8])
             if self.gpu:
                 context_id = context_id.pin_memory()
                 context_feature = context_feature.pin_memory()
