@@ -87,9 +87,9 @@ def main():
         # save
         if not args.save_last_only or epoch == epoch_0 + args.epochs - 1:
             model_file = os.path.join(args.model_dir, 'checkpoint_epoch_{}.pt'.format(epoch))
-            model.save(model_file, epoch, [em, f1, best_val_score])
-            if f1 > best_val_score:
-                best_val_score = f1
+            model.save(model_file, epoch, [acc, best_val_score])
+            if acc > best_val_score:
+                best_val_score = acc
                 copyfile(
                     model_file,
                     os.path.join(args.model_dir, 'best_model.pt'))
