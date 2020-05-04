@@ -102,6 +102,7 @@ class RnnDocReader(nn.Module):
             doc_hidden_size,
             question_hidden_size,
         )
+        self.projection = nn.Linear(2*opt['hidden_size'], 2)
 
     def forward(self, x1, x1_f, x1_pos, x1_ner, x1_mask, x2, x2_mask):
         """Inputs:
@@ -145,7 +146,13 @@ class RnnDocReader(nn.Module):
             q_merge_weights = self.self_attn(question_hiddens, x2_mask)
         question_hidden = layers.weighted_avg(question_hiddens, q_merge_weights)
 
-        # Predict start and end positions
-        start_scores = self.start_attn(doc_hiddens, question_hidden, x1_mask)
-        end_scores = self.end_attn(doc_hiddens, question_hidden, x1_mask)
-        return start_scores, end_scores
+        # here comes the difference with DrQA - adaptation to BoolQ format
+        # aggregate passage vectors
+        d_merge_weights = layers.uniform_weights(doc_hiddens, x1_mask)
+        document_hidden = layers.weighted_avg(doc_hiddens, d_merge_weights)
+
+        # hiddens are of the shape [batch_size, hidden_size]
+        # pair vector is a shape of [batch_size, 2*hidden_size]
+        pair_vector = torch.cat([question_hidden, document_hidden], 1)
+
+        return self.projection(pair_vector)
